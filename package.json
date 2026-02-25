@@ -1,0 +1,15 @@
+{
+  "name": "taskflow-saasapi",
+  "version": "1.0.0",
+  "description": "A Task Manager SaaS API helps teams create, assign, and track with role-based permission and secure backend logic.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Qudratullah Masoom",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.2.1",
+    "mongoose": "^9.2.2"
+  }
+}
