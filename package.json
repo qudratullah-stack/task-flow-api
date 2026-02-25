@@ -4,12 +4,21 @@
   "description": "A Task Manager SaaS API helps teams create, assign, and track with role-based permission and secure backend logic.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "ts-node src/server.ts"
   },
   "author": "Qudratullah Masoom",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "mongoose": "^9.2.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.3.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }
