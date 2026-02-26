@@ -2,7 +2,7 @@ import mongoose, { Document, Schema,  } from "mongoose";
 
 import { signupType } from "../Types/SignypTypes";
 export interface newSignupTypes extends signupType, Document{}
-export const SignupSchema = new Schema  <newSignupTypes> ({
+ const SignupSchema = new Schema  <newSignupTypes> ({
     name:{
         type: String,
         required: true
@@ -28,3 +28,4 @@ export const SignupSchema = new Schema  <newSignupTypes> ({
     }
     
 },{timestamps: true})
+export const  signup = mongoose.model('SaasAuth', SignupSchema)
