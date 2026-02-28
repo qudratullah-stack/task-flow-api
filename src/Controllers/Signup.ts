@@ -37,3 +37,27 @@ if(error){
         res.status(500).json({message: 'Your account is Not make'})
     }
 } 
+export const verifyController = async(req: Request, res: Response) =>{
+    try{
+        const {email, verificationCode} = req.body
+        const user = await signup.findOne({email})
+        if(!user){
+          return res.status(400).json({message: 'User Not Found'})
+        }
+      
+        if(user.verificationCode !== Number(verificationCode) ){
+          return  res.status(400).json({message:'Invalid Code'})
+        }
+        if(!user.verificationCodeExpires || user.verificationCodeExpires < new Date()){
+          return res.status(400).json({message: 'Code Expired'})
+        }
+        user.verified = true
+        user.verificationCode = undefined
+        user.verificationCodeExpires = undefined
+        await user.save()
+        
+        res.status(200).json({message: 'Your account is make successfully make '})
+    }catch(err){
+      res.status(500).json({message: 'Not Found Code'})
+    }
+}

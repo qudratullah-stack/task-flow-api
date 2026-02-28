@@ -3,6 +3,6 @@ export interface signupType   {
     email: string,
     password: string,
     verified: boolean,
-    verificationCode?: number,
+    verificationCode?: number | null,
     verificationCodeExpires?: Date
 }
