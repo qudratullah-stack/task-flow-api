@@ -1,58 +1,62 @@
-import type { Request, Response } from "express";
+import { Request, Response } from "express";
 import { signup } from "../Models/signupSchema";
-import bcrypt from 'bcrypt'
 import { Resend } from "resend";
-export const SignupController = async (req: Request, res: Response) => {
-  try {
-    const { name, email, password } = req.body
-    const DuplicateEmail = await signup.findOne({ email })
-    if (DuplicateEmail) {
-      return res.status(400).json({ message: 'Email already Exists' })  }
-    const code = Math.floor(100000 + Math.random() * 900000);
-  const hashPassword = await bcrypt.hash(password, 10);
-    const expiryTime = new Date(Date.now() + 24 * 60 * 60 * 1000)
-    const newuser = await signup.create({
-      name,
-      email,
-      password: hashPassword,
-      verificationCode: code,
-      verified: false,
-      verificationCodeExpires: expiryTime
-    })
-    const resend = new Resend(process.env.RESEND_API);
-    const { data, error } = await resend.emails.send({
-      from: "Acme <onboarding@resend.dev>",
-      to: [email],
-      subject: "Hello  this message is coming to SassWebsite",
-      html: `<p>Your verification code is ${code}</p>`,
-    });
-    if (error) {
-      return res.status(400).json({ message: 'Email Not sent ' })}
-    res.status(200).json({ message: 'Your account is Create successfully Verification Code send to your email' })
-    } catch (err) {
-    res.status(500).json({ message: 'Your account is Not make' })}
-}
-export const verifyController = async (req: Request, res: Response) => {
-  try {
-    const { email, verificationCode } = req.body
-    const user = await signup.findOne({ email })
-    if (!user) {
-      return res.status(400).json({ message: 'User Not Found' })
-    }
+import { z } from "zod"; 
+import asyncHandler from "express-async-handler"; 
+import crypto from 'crypto'
+import bcrypt from 'bcrypt'
+const signupSchema = z.object({
+  name: z.string().min(3, "Name is too short"),
+  email: z.string().email("Invalid email format"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
 
-    if (user.verificationCode !== Number(verificationCode)) {
-      return res.status(400).json({ message: 'Invalid Code' })
-    }
-    if (!user.verificationCodeExpires || user.verificationCodeExpires < new Date()) {
-      return res.status(400).json({ message: 'Code Expired' })
-    }
-    user.verified = true
-    user.verificationCode = undefined
-    user.verificationCodeExpires = undefined
-    await user.save()
+const resend = new Resend(process.env.RESEND_API);
 
-    res.status(200).json({ message: 'Your account is make successfully make ' })
-  } catch (err) {
-    res.status(500).json({ message: 'Not Found Code' })
+export const SignupController = asyncHandler(async (req: Request, res: Response) => {
+  // 2. ویلیڈیشن (اگر ڈیٹا غلط ہے تو یہیں سے ایرر جائے گا)
+  const validatedData = signupSchema.parse(req.body);
+  const { name, email, password } = validatedData;
+
+  // 3. ای میل کی موجودگی چیک کرنا (Optimization: select only id)
+  const existingUser = await signup.findOne({ email }).select("_id");
+  if (existingUser) {
+    res.status(400);
+    throw new Error("User already exists with this email");
   }
-}
+
+  
+  const verificationCode = crypto.randomInt(100000,999999).toString()
+  const hashVerificationCode = await bcrypt.hash(verificationCode, 10)
+  const expiryTime = new Date(Date.now() + 15 * 60 * 1000); 
+
+  
+  const newUser = await signup.create({
+    name,
+    email,
+    password,
+    verificationCode: hashVerificationCode,
+    verified: false,
+    verificationCodeExpires: expiryTime,
+  });
+
+  // 6. ای میل سروس (In Senior projects, this goes to a Background Queue)
+  try {
+    await resend.emails.send({
+      from: "SaaS Platform <onboarding@yourdomain.com>",
+      to: [email],
+      subject: "Verify Your Account",
+      html: `<strong>Your code: ${verificationCode}</strong>. Expires in 15 minutes.`,
+    });
+  } catch (emailError) {
+    // اگر ای میل نہ جائے تو یوزر ڈیلیٹ کر دیں تاکہ ڈیٹا گندا نہ ہو (Atomic-like behavior)
+    await signup.findByIdAndDelete(newUser._id);
+    res.status(500);
+    throw new Error("Failed to send verification email. Please try again.");
+  }
+
+  res.status(201).json({
+    success: true,
+    message: "Verification code sent to your email.",
+  });
+});

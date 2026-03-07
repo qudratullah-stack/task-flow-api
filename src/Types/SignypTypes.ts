@@ -4,6 +4,6 @@ export interface signupType   {
     password: string,
     role: string,
     verified: boolean,
-    verificationCode?: number | null,
+    verificationCode?: string | null,
     verificationCodeExpires?: Date
 }
