@@ -4,12 +4,14 @@ import dotenv from "dotenv";
 dotenv.config();
 import cors from "cors";
 import helmet from "helmet";
-import signupRoute from "./Routers/signupRouter";
+import signupRoute from "./Routers/authRouter";
 import { DB } from "./Config/db";
 import { notFound } from "./MiddleWare/errorMiddleware";
+import cookieParser from 'cookie-parser'
 import { errorHandler } from "./MiddleWare/errorMiddleware";
 const app: Application = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5000
+app.use(cookieParser())
 app.use(helmet()); 
 app.use(cors({
     origin: process.env.CLIENT_URL, 
