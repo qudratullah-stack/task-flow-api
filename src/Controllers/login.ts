@@ -1,38 +1,35 @@
-// import type { Request, Response } from "express";
-// import { signup } from "../Models/signupSchema";
-// import bcrypt from 'bcrypt'
-// import jwt from 'jsonwebtoken'
-// export const LoginController = async (req: Request, res:Response)=>{
-//     try{
-//         const {email, password} = req.body
-//         const User = await signup.findOne({email})
-//         if(!User){
-//             return res.status(400).json({message: 'Invalid Credetinals'})
-//         }
-//         const UserPassword = await bcrypt.compare(password, User?.password)
-//         if(!UserPassword){
-//             return res.status(400).json({message: 'Invalid Credetinals'})
-//         }
-//         const JWT_SECRET =  process.env.JWT_SECRET
-//         const REFRESH_TOKEN = process.env.REFRESH_TOKEN
-//         const accessTokenExpire = process.env.ACCESS_TOKEN_EXPIRES
-//         const REFRESH_TOKEN_EXPIRES = process.env.REFRESH_TOKEN_EXPIRES
-//         if(!JWT_SECRET || !REFRESH_TOKEN || !accessTokenExpire || !REFRESH_TOKEN_EXPIRES){
-//             return res.status(500).json('Server Configration error')
-//         }
-//         const accessToken = jwt.sign(
-//             {id: User._id, email: User.email, role: User.role},
-//             JWT_SECRET,
-//             {expiresIn: accessTokenExpire}
-//           )
-          
-//            const refreshToken = jwt.sign(
-//             {id: User._id, email: User.email, role: User.role},
-//             REFRESH_TOKEN,
-//             {expiresIn: REFRESH_TOKEN_EXPIRES}
-//           )
-//           res.status(200).json({message: 'Login Successfully', refreshToken,accessToken})
-//     }catch(err){
-//         res.status(500).json({message:'Network Error'})
-//     }
-// }
+import { Request, Response } from "express";
+import { signup } from "../Models/signupSchema";
+import asyncHandler from "express-async-handler";
+import bcrypt from "bcrypt";
+import { z } from "zod";
+import { sendToken } from "./jwtController";
+
+const loginSchema = z.object({
+  email: z.string().email("Invalid email format"),
+  password: z.string().min(1, "Password is required"),
+});
+
+export const LoginController = asyncHandler(async (req: Request, res: Response) => {
+  const { email, password } = loginSchema.parse(req.body);
+
+  const user = await signup.findOne({ email }).select("+password +verified");
+
+  if (!user) {
+    res.status(401); 
+    throw new Error("Invalid email or password");
+  }
+
+  if (!user.verified) {
+    res.status(403); 
+    throw new Error("Please verify your email before logging in");
+  }
+
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    res.status(401);
+    throw new Error("Invalid email or password");
+  }
+
+  sendToken(user, 200, res);
+});

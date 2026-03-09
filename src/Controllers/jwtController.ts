@@ -10,7 +10,7 @@ export const sendToken = (user: any, statusCode: number, res: Response) => {
 
   const refreshToken = jwt.sign(
     { id: user._id },
-    process.env.REFRESH_TOKEN_SECRET!,
+    process.env.REFRESH_TOKEN!,
     { expiresIn: "7d" }
   );
 
