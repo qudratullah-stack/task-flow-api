@@ -37,6 +37,11 @@ const SignupSchema = new Schema<newSignupTypes>({
         default: false,
         index: true
     },
+    createdAT:{
+        type: Date,
+        default: Date.now,
+        expires: 86000
+    },
     verificationCode: { type: String, select: false },
     verificationCodeExpires: { type: Date, select: false }
 }, { 
