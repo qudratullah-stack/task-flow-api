@@ -1,13 +1,13 @@
 
 import express, { Application } from "express";
 import dotenv from "dotenv";
+dotenv.config();
 import cors from "cors";
 import helmet from "helmet";
 import signupRoute from "./Routers/signupRouter";
 import { DB } from "./Config/db";
 import { notFound } from "./MiddleWare/errorMiddleware";
 import { errorHandler } from "./MiddleWare/errorMiddleware";
-dotenv.config();
 const app: Application = express();
 const PORT = process.env.PORT || 5000;
 app.use(helmet()); 

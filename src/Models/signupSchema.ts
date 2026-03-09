@@ -56,6 +56,5 @@ SignupSchema.methods.comparePassword = async function (enteredPassword: string) 
     return await bcrypt.compare(enteredPassword, this.password);
 };
 
-SignupSchema.index({ email: 1 });
 
 export const signup = mongoose.model<newSignupTypes>('SaasUser', SignupSchema);

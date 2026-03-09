@@ -10,17 +10,15 @@ const signupSchema = z.object({
   email: z.string().email("Invalid email format"),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
-
 const resend = new Resend(process.env.RESEND_API);
 
 export const SignupController = asyncHandler(async (req: Request, res: Response) => {
-  // 2. ویلیڈیشن (اگر ڈیٹا غلط ہے تو یہیں سے ایرر جائے گا)
+ 
   const validatedData = signupSchema.parse(req.body);
   const { name, email, password } = validatedData;
 
-  // 3. ای میل کی موجودگی چیک کرنا (Optimization: select only id)
-  const existingUser = await signup.findOne({ email }).select("_id");
-  if (existingUser) {
+  const duplicateUser = await signup.findOne({ email }).select("_id");
+  if (duplicateUser) {
     res.status(400);
     throw new Error("User already exists with this email");
   }
@@ -40,20 +38,21 @@ export const SignupController = asyncHandler(async (req: Request, res: Response)
     verificationCodeExpires: expiryTime,
   });
 
-  // 6. ای میل سروس (In Senior projects, this goes to a Background Queue)
-  try {
-    await resend.emails.send({
-      from: "SaaS Platform <onboarding@yourdomain.com>",
-      to: [email],
-      subject: "Verify Your Account",
-      html: `<strong>Your code: ${verificationCode}</strong>. Expires in 15 minutes.`,
-    });
-  } catch (emailError) {
-    // اگر ای میل نہ جائے تو یوزر ڈیلیٹ کر دیں تاکہ ڈیٹا گندا نہ ہو (Atomic-like behavior)
-    await signup.findByIdAndDelete(newUser._id);
-    res.status(500);
-    throw new Error("Failed to send verification email. Please try again.");
-  }
+
+const { data, error } = await resend.emails.send({
+  from: "Acme <onboarding@resend.dev>", 
+  to: [email],
+  subject: "Verify Your Account",
+  html: `<strong>Your code: ${verificationCode}</strong>. Expires in 15 minutes.`,
+});
+
+
+if (error) {
+  
+  await signup.findByIdAndDelete(newUser._id);
+  res.status(500);
+  throw new Error(`Email failed: ${error.message}`);
+}
 
   res.status(201).json({
     success: true,
