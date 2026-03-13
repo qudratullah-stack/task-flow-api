@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import { signupType } from "../Types/SignypTypes";
 
 export interface newSignupTypes extends signupType, Document {
+    googleId?: string; 
     comparePassword(password: string): Promise<boolean>; 
 }
 
@@ -23,9 +24,16 @@ const SignupSchema = new Schema<newSignupTypes>({
     },
     password: {
         type: String,
-        required: [true, "Password is required"],
+        required: function(this: any) {
+            return !this.googleId; 
+        },
         minlength: [8, "Password must be 8+ characters"],
         select: false 
+    },
+    googleId: {
+        type: String,
+        unique: true,
+        sparse: true 
     },
     role: {
         type: String,
@@ -37,11 +45,6 @@ const SignupSchema = new Schema<newSignupTypes>({
         default: false,
         index: true
     },
-    createdAT:{
-        type: Date,
-        default: Date.now,
-        expires: 86000
-    },
     verificationCode: { type: String, select: false },
     verificationCodeExpires: { type: Date, select: false }
 }, { 
@@ -49,17 +52,16 @@ const SignupSchema = new Schema<newSignupTypes>({
     versionKey: false 
 });
 
-SignupSchema.pre("save", async function () {
-
-    if (!this.isModified("password")) return;
+SignupSchema.pre("save", async function (next) {
+    if (!this.isModified("password") || !this.password) return 
     const salt = await bcrypt.genSalt(12);
     this.password = await bcrypt.hash(this.password, salt);
-    
+   
 });
 
 SignupSchema.methods.comparePassword = async function (enteredPassword: string) {
+    if (!this.password) return false;
     return await bcrypt.compare(enteredPassword, this.password);
 };
-
 
 export const signup = mongoose.model<newSignupTypes>('SaasUser', SignupSchema);

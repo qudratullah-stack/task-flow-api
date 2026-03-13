@@ -9,6 +9,8 @@ import { DB } from "./Config/db";
 import { notFound } from "./MiddleWare/errorMiddleware";
 import cookieParser from 'cookie-parser'
 import { errorHandler } from "./MiddleWare/errorMiddleware";
+import googleRouter from "./Routers/gooGleAuthRouter";
+import passport from 'passport';
 const app: Application = express();
 const PORT = process.env.PORT || 5000
 app.use(cookieParser())
@@ -21,8 +23,9 @@ app.use(cors({
 
 app.use(express.json({ limit: "10kb" })); 
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
-
+app.use(passport.initialize());
 app.use("/api/v1/auth", signupRoute); 
+app.use('/api/auth',googleRouter)
 app.use(notFound); 
 app.use(errorHandler); 
 

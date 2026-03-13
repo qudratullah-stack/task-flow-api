@@ -6,5 +6,6 @@ export interface signupType   {
     verified: boolean,
     verificationCode?: string | null,
     verificationCodeExpires?: Date,
+     googleId?: string; 
     createdAT?:Date
 }
