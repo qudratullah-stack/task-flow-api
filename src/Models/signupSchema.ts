@@ -1,6 +1,7 @@
 import mongoose, { Document, Schema } from "mongoose"; 
 import bcrypt from "bcrypt";
 import { signupType } from "../Types/SignypTypes";
+import { required } from "zod/v4/core/util.cjs";
 
 export interface newSignupTypes extends signupType, Document {
    
@@ -50,7 +51,15 @@ const SignupSchema = new Schema<newSignupTypes>({
     refreshToken:{
         type: String,
         select: false
-    }
+    },
+    loginAttempts:{
+        type: Number,
+        required: true,
+        default: 0
+    },
+    lockUntil:{
+        type: Date
+    },
 }, { 
     timestamps: true,
     versionKey: false 

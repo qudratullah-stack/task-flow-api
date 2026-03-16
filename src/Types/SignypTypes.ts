@@ -8,5 +8,7 @@ export interface signupType   {
     verificationCodeExpires?: Date,
      googleId?: string,
     createdAT?:Date,
-    refreshToken: string | undefined
+    refreshToken?: string | undefined,
+    loginAttempts: number,
+    lockUntil: Date | undefined
 }
