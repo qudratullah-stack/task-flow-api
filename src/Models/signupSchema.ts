@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import { signupType } from "../Types/SignypTypes";
 
 export interface newSignupTypes extends signupType, Document {
-    googleId?: string; 
+   
     comparePassword(password: string): Promise<boolean>; 
 }
 
@@ -46,7 +46,11 @@ const SignupSchema = new Schema<newSignupTypes>({
         index: true
     },
     verificationCode: { type: String, select: false },
-    verificationCodeExpires: { type: Date, select: false }
+    verificationCodeExpires: { type: Date, select: false },
+    refreshToken:{
+        type: String,
+        select: false
+    }
 }, { 
     timestamps: true,
     versionKey: false 
