@@ -1,7 +1,8 @@
 import mongoose, { Document, Schema } from "mongoose"; 
 import bcrypt from "bcrypt";
 import { signupType } from "../Types/SignypTypes";
-import { required } from "zod/v4/core/util.cjs";
+import crypto from "crypto";
+
 
 export interface newSignupTypes extends signupType, Document {
    
@@ -60,6 +61,12 @@ const SignupSchema = new Schema<newSignupTypes>({
     lockUntil:{
         type: Date
     },
+    passwordResetToken: {
+        type: String
+    },
+    passwordResetExpires:{
+        type: Date
+    }
 }, { 
     timestamps: true,
     versionKey: false 
@@ -77,4 +84,15 @@ SignupSchema.methods.comparePassword = async function (enteredPassword: string) 
     return await bcrypt.compare(enteredPassword, this.password);
 };
 
+SignupSchema.methods.createPasswordResetToken = function () {
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    this.passwordResetToken = crypto
+        .createHash("sha256")
+        .update(resetToken)
+        .digest("hex");
+
+    this.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000);
+    return resetToken;
+};
 export const signup = mongoose.model<newSignupTypes>('SaasUser', SignupSchema);
