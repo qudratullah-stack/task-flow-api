@@ -27,7 +27,10 @@ export const LoginController = asyncHandler(async (req: Request, res: Response) 
         res.status(403);
         throw new Error("Please verify your email before logging in");
     }
-
+    if(!user.password && user.googleId){
+        res.status(400);
+        throw new Error('Thsi account was created using Google. Please use "Login with Google"')
+    }
     const isMatch = await bcrypt.compare(password, user.password);
     if(!user.password && user.googleId){
         res.status(400)
@@ -53,5 +56,5 @@ export const LoginController = asyncHandler(async (req: Request, res: Response) 
     user.lockUntil = undefined;
     await user.save({ validateBeforeSave: false });
 
-    sendToken(user, 200, res);
+    sendToken(user, 200, res, false);
 });

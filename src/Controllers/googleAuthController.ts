@@ -39,5 +39,5 @@ export const loginSuccess = asyncHandler(async (req: Request, res: Response) => 
             role: "user"
         });
     }
-    sendToken(user, 200, res);
+    sendToken(user, 200, res, true);
 });
