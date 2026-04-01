@@ -12,5 +12,6 @@ export interface signupType   {
     loginAttempts: number,
     lockUntil: Date | undefined,
     passwordResetToken?: string,
-    passwordResetExpires?: Date   
+    passwordResetExpires?: Date   ,
+    avater: string
 }

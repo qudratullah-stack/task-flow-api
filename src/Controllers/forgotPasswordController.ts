@@ -17,11 +17,12 @@ export const forgotPassword = asyncHandler(async (req: Request, res: Response) =
     await user.save({ validateBeforeSave: false });
 
     
-    const resetURL = `${req.protocol}://${req.get("host")}/api/v1/auth/reset-password/${resetToken}`;
+   
+const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
     const emailHtml = `
         <h1>Forgot your password?</h1>
         <p>Please click the link below to reset your password. This link is valid for 10 minutes only.</p>
-        <a href="${resetURL}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Reset Password</a>
+        <a href="${resetUrl}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Reset Password</a>
         <p>If you didn't forget your password, please ignore this email!</p>
     `;
 
@@ -35,7 +36,7 @@ export const forgotPassword = asyncHandler(async (req: Request, res: Response) =
 
         res.status(200).json({
             status: "success",
-            message: "Token sent to email! (Check console if using testing mode)"
+            message: "Token sent to email!"
         });
     } catch (err) {
         user.passwordResetToken = undefined;

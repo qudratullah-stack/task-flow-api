@@ -66,6 +66,10 @@ const SignupSchema = new Schema<newSignupTypes>({
     },
     passwordResetExpires:{
         type: Date
+    },
+    avater:{
+        type: String,
+        default: "default-avatar.png"
     }
 }, { 
     timestamps: true,
