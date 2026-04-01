@@ -8,5 +8,5 @@ import { protect } from '../MiddleWare/protectMiddleware'
 googleRouter.get('/google',signupLimit,googleLogin)
 googleRouter.get('/google/callback',googleCallback, loginSuccess)
 googleRouter.get('/refresh-token',refreshAccessToken)
-googleRouter.get('/logout',protect,logout)
+googleRouter.post('/logout',logout)
 export default googleRouter;

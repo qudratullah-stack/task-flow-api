@@ -17,7 +17,7 @@ export const forgotPassword = asyncHandler(async (req: Request, res: Response) =
     await user.save({ validateBeforeSave: false });
 
     
-    const resetURL = `${req.protocol}://${req.get("host")}/api/auth/reset-password/${resetToken}`;
+    const resetURL = `${req.protocol}://${req.get("host")}/api/v1/auth/reset-password/${resetToken}`;
     const emailHtml = `
         <h1>Forgot your password?</h1>
         <p>Please click the link below to reset your password. This link is valid for 10 minutes only.</p>

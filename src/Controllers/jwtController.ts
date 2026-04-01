@@ -18,8 +18,9 @@ export const sendToken = async (user: any, statusCode: number, res: Response, is
     const cookieOptions = {
         expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         httpOnly: true, 
-        secure: true,   
-        sameSite: "none" as const, 
+        path: '/',
+        secure: false,   
+        sameSite: "lax" as const, 
     };
 
     res.cookie("SaasAccessToken", SaasAccessToken, { ...cookieOptions, expires: new Date(Date.now() + 15 * 60 * 1000) });

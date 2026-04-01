@@ -1,6 +1,5 @@
 import type { Request, Response } from "express";
 import asyncHandler from 'express-async-handler'
-import { signup } from "../Models/signupSchema";
 export const getMe = asyncHandler(async (req: Request, res: Response) => {
 
     const user = (req as any ).user

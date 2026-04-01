@@ -25,7 +25,7 @@ app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 app.use(passport.initialize());
 app.use("/api/v1/auth", signupRoute); 
-app.use('/api/auth',googleRouter)
+app.use('/api/v1/auth',googleRouter)
 app.use(notFound); 
 app.use(errorHandler); 
 
