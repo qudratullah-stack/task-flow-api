@@ -10,11 +10,14 @@ import { notFound } from "./MiddleWare/errorMiddleware";
 import cookieParser from 'cookie-parser'
 import { errorHandler } from "./MiddleWare/errorMiddleware";
 import googleRouter from "./Routers/gooGleAuthRouter";
+import path from 'path';
 import passport from 'passport';
 const app: Application = express();
 const PORT = process.env.PORT || 5000
 app.use(cookieParser())
-app.use(helmet()); 
+app.use(helmet({
+    crossOriginResourcePolicy: {policy: "cross-origin"},
+})); 
 app.use(cors({
     origin: process.env.CLIENT_URL, 
     methods: ["GET", "POST", "PUT", "DELETE","PATCH"],
@@ -26,6 +29,7 @@ app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 app.use(passport.initialize());
 app.use("/api/v1/auth", signupRoute); 
 app.use('/api/v1/auth',googleRouter)
+app.use('/uploads', express.static('public/uploads'));
 app.use(notFound); 
 app.use(errorHandler); 
 

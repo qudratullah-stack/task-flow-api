@@ -9,7 +9,7 @@ export const uploadAvatar = async (req: Request, res: Response) => {
     const imagePath = `/uploads/${req.file.filename}`;
     
     const updatedsignup = await signup.findByIdAndUpdate(
-      (req as any).signup._id, 
+      (req as any).user._id, 
       { avatar: imagePath },
       { new: true }
     ).select("-password");

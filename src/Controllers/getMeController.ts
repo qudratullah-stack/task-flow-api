@@ -11,6 +11,8 @@ export const getMe = asyncHandler(async (req: Request, res: Response) => {
             name: user.name,
             email: user.email,
             role: user.role,
+            avatar: user.avatar,
+            createdAt: user.createdAt
         },
     });
 });
