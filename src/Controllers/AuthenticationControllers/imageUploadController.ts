@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { signup } from "../Models/signupSchema";
+import { signup } from "../../Models/signupSchema";
 export const uploadAvatar = async (req: Request, res: Response) => {
   try {
     if (!req.file) {

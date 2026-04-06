@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { sendToken } from './jwtController';
-import { signup } from '../Models/signupSchema';
+import { signup } from '../../Models/signupSchema';
 import asyncHandler from 'express-async-handler'
 
 passport.use(new GoogleStrategy({

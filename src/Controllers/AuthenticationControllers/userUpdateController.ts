@@ -1,4 +1,4 @@
-import { signup } from "../Models/signupSchema";
+import { signup } from "../../Models/signupSchema";
 import type { Request, Response } from "express";
 import asyncHandler from 'express-async-handler';
 

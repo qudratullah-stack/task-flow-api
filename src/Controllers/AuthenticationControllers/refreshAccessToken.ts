@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { signup } from '../Models/signupSchema';
+import { signup } from '../../Models/signupSchema';
 import asyncHandler from 'express-async-handler';
 
 export const refreshAccessToken = asyncHandler(async (req: Request, res: Response) => {

@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { signup } from "../Models/signupSchema";
+import { signup } from "../../Models/signupSchema";
 import asyncHandler from 'express-async-handler'
 import { Resend } from "resend"; 
 const resend = new Resend(process.env.RESEND_API)

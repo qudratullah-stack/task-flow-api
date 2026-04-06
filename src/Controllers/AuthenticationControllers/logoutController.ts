@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { signup } from "../Models/signupSchema";
+import { signup } from "../../Models/signupSchema";
 import asyncHandler from "express-async-handler";
 
 export const logout = asyncHandler(async (req: Request, res: Response) => {
