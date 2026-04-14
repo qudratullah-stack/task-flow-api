@@ -10,7 +10,8 @@ import { getMe } from '../Controllers/AuthenticationControllers/getMeController'
 import { protect } from '../MiddleWare/protectMiddleware'
 import { upload } from '../MiddleWare/uploadMiddleware'
 import { uploadAvatar } from '../Controllers/AuthenticationControllers/imageUploadController'
-import { updateMe } from '../Controllers/AuthenticationControllers/userUpdatController'
+import { updateMe } from '../Controllers/AuthenticationControllers/userUpdateController'
+import { changePassword } from '../Controllers/AuthenticationControllers/updatePassword'
 signupRoute.post('/signup',signupLimit,SignupController)
 signupRoute.post('/verify',signupLimit,verifyController)
 signupRoute.post('/login',loginLimit,LoginController)
@@ -19,4 +20,5 @@ signupRoute.patch("/reset-password/:token", resetPassword);
 signupRoute.get('/me',protect,getMe)
 signupRoute.patch('/update-me',protect,updateMe)
 signupRoute.patch("/update-avatar", protect, upload.single("avatar"), uploadAvatar);
+signupRoute.post("/change-password",protect, changePassword)
 export default signupRoute

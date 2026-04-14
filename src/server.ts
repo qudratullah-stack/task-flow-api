@@ -10,6 +10,7 @@ import { notFound } from "./MiddleWare/errorMiddleware";
 import cookieParser from 'cookie-parser'
 import { errorHandler } from "./MiddleWare/errorMiddleware";
 import googleRouter from "./Routers/gooGleAuthRouter";
+import TaskRouter from "./Routers/taskRouter";
 import path from 'path';
 import passport from 'passport';
 const app: Application = express();
@@ -29,6 +30,7 @@ app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 app.use(passport.initialize());
 app.use("/api/v1/auth", signupRoute); 
 app.use('/api/v1/auth',googleRouter)
+app.use("/api/v1/tasks", TaskRouter)
 app.use('/uploads', express.static('public/uploads'));
 app.use(notFound); 
 app.use(errorHandler); 

@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
-import { signup } from "../Models/signupSchema";
+import { signup } from "../../Models/signupSchema";
 import asyncHandler from 'express-async-handler'
 import crypto from 'crypto'
-import { sendToken } from "./AuthenticationControllers/jwtController";
+import { sendToken } from "./jwtController";
 export const resetPassword = asyncHandler(async (req: Request, res: Response) => {
 
     const hashedToken = crypto

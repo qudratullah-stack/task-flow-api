@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { signup } from "../Models/signupSchema";
+import { signup } from "../../Models/signupSchema";
 import { Resend } from "resend";
 import { z } from "zod";
 import asyncHandler from "express-async-handler";
