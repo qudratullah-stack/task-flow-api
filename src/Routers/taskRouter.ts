@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createTask ,getAllTasks} from "../Controllers/taskController";
+import { createTask ,getAllTasks,updateTask,deleteTask} from "../Controllers/taskController";
 import { protect } from "../MiddleWare/protectMiddleware";
 import { validate } from "../MiddleWare/validateMiddleware";
 import { createTaskSchema } from "../Controllers/Validations/task.validation";
@@ -18,5 +18,6 @@ TaskRouter.post(
   createTask                 
 );
 TaskRouter.get("/getalltasks", protect, getAllTasks);
-
+TaskRouter.route("/update/:id").patch(protect, updateTask);
+TaskRouter.route("/delete/:id").delete(protect, deleteTask);
 export default TaskRouter;

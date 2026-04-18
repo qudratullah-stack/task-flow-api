@@ -46,3 +46,66 @@ export const getAllTasks = asyncHandler(async (req: Request, res: Response) => {
     data: tasks,
   });
 });
+
+/**
+ * @desc    Update a task
+ * @route   PATCH /api/v1/tasks/:id
+ * @access  Private
+ */
+export const updateTask = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const userId = (req as any).user._id;
+
+  let task = await Task.findById(id);
+
+  if (!task) {
+    res.status(404);
+    throw new Error("Task not found");
+  }
+
+  if (task.user.toString() !== userId.toString()) {
+    res.status(401);
+    throw new Error("User not authorized to update this task");
+  }
+
+  task = await Task.findByIdAndUpdate(id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Task updated successfully",
+    data: task,
+  });
+});
+
+/**
+ * @desc    Delete a task
+ * @route   DELETE /api/v1/tasks/:id
+ * @access  Private
+ */
+export const deleteTask = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const userId = (req as any).user._id;
+
+  const task = await Task.findById(id);
+
+  if (!task) {
+    res.status(404);
+    throw new Error("Task not found");
+  }
+
+  if (task.user.toString() !== userId.toString()) {
+    res.status(401);
+    throw new Error("User not authorized to delete this task");
+  }
+
+  await task.deleteOne();
+
+  res.status(200).json({
+    success: true,
+    message: "Task removed successfully",
+    data: {} 
+  });
+});
