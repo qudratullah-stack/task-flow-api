@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createTask } from "../Controllers/taskController";
+import { createTask ,getAllTasks} from "../Controllers/taskController";
 import { protect } from "../MiddleWare/protectMiddleware";
 import { validate } from "../MiddleWare/validateMiddleware";
 import { createTaskSchema } from "../Controllers/Validations/task.validation";
@@ -17,5 +17,6 @@ TaskRouter.post(
   validate(createTaskSchema), 
   createTask                 
 );
+TaskRouter.get("/getalltasks", protect, getAllTasks);
 
 export default TaskRouter;

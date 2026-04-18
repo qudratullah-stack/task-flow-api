@@ -27,3 +27,22 @@ export const createTask = asyncHandler(async (req: Request, res: Response) => {
     data: task,
   });
 });
+
+
+/**
+ * @desc    Get all tasks for the logged-in user
+ * @route   GET /api/v1/tasks
+ * @access  Private
+ */
+export const getAllTasks = asyncHandler(async (req: Request, res: Response) => {
+  const userId = (req as any).user._id;
+
+  const tasks = await Task.find({ user: userId }).sort("-createdAt");
+
+ 
+  res.status(200).json({
+    success: true,
+    count: tasks.length, 
+    data: tasks,
+  });
+});
