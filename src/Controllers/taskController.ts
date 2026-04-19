@@ -30,22 +30,49 @@ export const createTask = asyncHandler(async (req: Request, res: Response) => {
 
 
 /**
- * @desc    Get all tasks for the logged-in user
+ * @desc    Get all tasks with Pagination, Filtering & Sorting
  * @route   GET /api/v1/tasks
  * @access  Private
  */
 export const getAllTasks = asyncHandler(async (req: Request, res: Response) => {
   const userId = (req as any).user._id;
 
-  const tasks = await Task.find({ user: userId }).sort("-createdAt");
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+  const skip = (page - 1) * limit;
+
+  const queryObj: any = { user: userId };
+  
+  if (req.query.status) queryObj.status = req.query.status;
+  if (req.query.priority) queryObj.priority = req.query.priority;
+  if (req.query.search) {
+    queryObj.title = { $regex: req.query.search, $options: "i" }; 
+  }
 
  
+  const tasks = await Task.find(queryObj)
+    .sort("-createdAt")
+    .skip(skip)
+    .limit(limit);
+
+  
+  const totalTasks = await Task.countDocuments(queryObj);
+  const totalPages = Math.ceil(totalTasks / limit);
+
   res.status(200).json({
     success: true,
-    count: tasks.length, 
+    count: tasks.length,
+    pagination: {
+      totalTasks,
+      totalPages,
+      currentPage: page,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1,
+    },
     data: tasks,
   });
 });
+
 
 /**
  * @desc    Update a task

@@ -17,7 +17,7 @@ TaskRouter.post(
   validate(createTaskSchema), 
   createTask                 
 );
-TaskRouter.get("/getalltasks", protect, getAllTasks);
+TaskRouter.get("/", protect, getAllTasks);
 TaskRouter.route("/update/:id").patch(protect, updateTask);
 TaskRouter.route("/delete/:id").delete(protect, deleteTask);
 export default TaskRouter;
