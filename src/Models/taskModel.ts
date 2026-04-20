@@ -1,8 +1,9 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, Types } from "mongoose";
 import { ITask, TaskStatus, TaskPriority } from "../Types/Task.Type"
 
-// Document interface for Mongoose
-export interface ITaskDocument extends Omit< ITask,"_id">, Document {}
+export interface ITaskDocument extends Omit<ITask, "_id">, Document {
+  workspace?: Types.ObjectId; 
+}
 
 const taskSchema = new Schema<ITaskDocument>(
   {
@@ -32,8 +33,14 @@ const taskSchema = new Schema<ITaskDocument>(
     },
     user: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: "SaasUser", 
       required: [true, "Task must belong to a user"],
+    },
+   
+    workspace: {
+      type: Schema.Types.ObjectId,
+      ref: "Workspace",
+      required: false, 
     },
   },
   {
@@ -43,7 +50,7 @@ const taskSchema = new Schema<ITaskDocument>(
   }
 );
 
-taskSchema.index({ user: 1, status: 1 });
+taskSchema.index({ user: 1, workspace: 1, status: 1 });
 
 const Task = model<ITaskDocument>("Task", taskSchema);
 
