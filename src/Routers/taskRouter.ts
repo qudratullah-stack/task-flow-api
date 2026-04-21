@@ -3,6 +3,7 @@ import { createTask ,getAllTasks,updateTask,deleteTask} from "../Controllers/tas
 import { protect } from "../MiddleWare/protectMiddleware";
 import { validate } from "../MiddleWare/validateMiddleware";
 import { createTaskSchema } from "../Controllers/Validations/task.validation";
+import { createWorkspace,addMemberToWorkspace } from "../Controllers/workspaceController";
 
 const TaskRouter = Router();
 
@@ -20,4 +21,12 @@ TaskRouter.post(
 TaskRouter.get("/", protect, getAllTasks);
 TaskRouter.route("/update/:id").patch(protect, updateTask);
 TaskRouter.route("/delete/:id").delete(protect, deleteTask);
+/**
+ * @route   POST /api/v1/workspaces
+ * @desc    new workspace for creating a group of tasks
+ * @access  Private
+ */
+TaskRouter.post("/create", protect, createWorkspace);
+
+TaskRouter.post("/add-member", protect, addMemberToWorkspace);
 export default TaskRouter;

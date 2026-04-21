@@ -1,0 +1,94 @@
+import { Request, Response, NextFunction } from "express";
+import { Workspace, WorkspaceRole } from "../Models/workSpace";
+import { asyncHandler } from "../MiddleWare/asyncHandler"; 
+import { AppError } from "../utils/AppError"; 
+import { signup as User } from "../Models/signupSchema"; 
+
+/**
+ * @desc    Create a new workspace
+ * @route   POST /api/v1/workspaces
+ * @access  Private (Logged-in users)
+ */
+export const createWorkspace = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  const { name, description } = req.body;
+
+  // 1. Validation check
+  if (!name) {
+    return next(new AppError("Please provide a workspace name", 400));
+  }
+
+  const newWorkspace = await Workspace.create({
+    name,
+    description,
+    owner: (req as any).user._id,
+    members: [
+      {
+        user: (req as any).user._id,
+        role: WorkspaceRole.ADMIN, 
+        joinedAt: new Date(),
+      },
+    ],
+  });
+
+  res.status(201).json({
+    success: true,
+    message: "Workspace created successfully",
+    data: newWorkspace,
+  });
+});
+
+
+
+
+/**
+ * @desc    Add a member to a workspace
+ * @route   POST /api/v1/workspaces/add-member
+ * @access  Private (Only Workspace Admin)
+ */
+export const addMemberToWorkspace = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  const { workspaceId, userEmail, role } = req.body;
+
+  if (!workspaceId || !userEmail) {
+    return next(new AppError("Please provide workspace ID and user email", 400));
+  }
+
+  const workspace = await Workspace.findById(workspaceId);
+  if (!workspace) {
+    return next(new AppError("Workspace not found", 404));
+  }
+
+  const requester = workspace.members.find(
+    (m) => m.user.toString() === (req as any).user._id.toString()
+  );
+
+  if (!requester || requester.role !== WorkspaceRole.ADMIN) {
+    return next(new AppError("Only workspace admins can add new members", 403));
+  }
+
+  const userToAdd = await User.findOne({ email: userEmail });
+  if (!userToAdd) {
+    return next(new AppError("User not found in our system. Please invite them to sign up first.", 404));
+  }
+
+  const isAlreadyMember = workspace.members.some(
+    (m) => m.user.toString() === userToAdd._id.toString()
+  );
+
+  if (isAlreadyMember) {
+    return next(new AppError("User is already a member of this workspace", 400));
+  }
+
+  workspace.members.push({
+    user: userToAdd._id as any,
+    role: role || WorkspaceRole.VIEWER, 
+    joinedAt: new Date(),
+  });
+
+  await workspace.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Member added successfully to the workspace",
+    data: workspace,
+  });
+});
