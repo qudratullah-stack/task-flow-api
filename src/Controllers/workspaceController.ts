@@ -3,7 +3,8 @@ import { Workspace, WorkspaceRole } from "../Models/workSpace";
 import { asyncHandler } from "../MiddleWare/asyncHandler"; 
 import { AppError } from "../utils/AppError"; 
 import { signup as User } from "../Models/signupSchema"; 
-
+import {io} from "../server"
+import { emitToWorkspace } from "../services/socketService";
 /**
  * @desc    Create a new workspace
  * @route   POST /api/v1/workspaces
@@ -85,6 +86,15 @@ export const addMemberToWorkspace = asyncHandler(async (req: Request, res: Respo
   });
 
   await workspace.save();
+  emitToWorkspace(io, workspaceId, "member_added", {
+    workspaceId: workspaceId,
+    message: `${userToAdd.name} has been added to the workspace `,
+    newMember: {
+        id: userToAdd._id,
+        name: userToAdd.name,
+        role: role || WorkspaceRole.VIEWER
+    }
+  });
 
   res.status(200).json({
     success: true,

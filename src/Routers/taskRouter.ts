@@ -26,7 +26,7 @@ TaskRouter.route("/delete/:id").delete(protect, deleteTask);
  * @desc    new workspace for creating a group of tasks
  * @access  Private
  */
-TaskRouter.post("/create", protect, createWorkspace);
+TaskRouter.post("/create-workspaces", protect, createWorkspace);
 
 TaskRouter.post("/add-member", protect, addMemberToWorkspace);
 export default TaskRouter;
