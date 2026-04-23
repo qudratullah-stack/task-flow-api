@@ -102,3 +102,22 @@ export const addMemberToWorkspace = asyncHandler(async (req: Request, res: Respo
     data: workspace,
   });
 });
+
+/**
+ * @desc    Get all workspaces where the current user is a member or owner
+ * @route   GET /api/v1/workspaces
+ * @access  Private
+ */
+export const getAllMyWorkspaces = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  const userId = (req as any).user._id;
+
+  const workspaces = await Workspace.find({
+    "members.user": userId
+  }).sort("-createdAt"); 
+
+  res.status(200).json({
+    success: true,
+    count: workspaces.length,
+    data: workspaces,
+  });
+});

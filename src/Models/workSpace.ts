@@ -75,5 +75,6 @@ WorkspaceSchema.pre("save", async function () {
     this.inviteCode = Math.random().toString(36).substring(2, 10).toUpperCase();
   }
 });
+WorkspaceSchema.index({"members.user":1});
 
 export const Workspace = mongoose.model<IWorkspace>("Workspace", WorkspaceSchema);
