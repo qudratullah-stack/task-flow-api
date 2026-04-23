@@ -121,3 +121,40 @@ export const getAllMyWorkspaces = asyncHandler(async (req: Request, res: Respons
     data: workspaces,
   });
 });
+
+/**
+ * @desc    Get Single Workspace Details (with members & stats)
+ * @route   GET /api/v1/workspaces/:id
+ * @access  Private
+ */
+export const getWorkspaceById = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+
+  const workspace = await Workspace.findById(id).populate({
+    path: "members.user",
+    select: "name email avatar", 
+  });
+
+  if (!workspace) {
+    return next(new AppError("Workspace not found", 404));
+  }
+
+  const isMember = workspace.members.some(
+    (m) => m.user._id.toString() === (req as any).user._id.toString()
+  );
+
+  if (!isMember) {
+    return next(new AppError("You do not have access to this workspace", 403));
+  }
+
+  const stats = {
+    activeTasks: 12, 
+    totalMembers: workspace.members.length,
+  };
+
+  res.status(200).json({
+    success: true,
+    data: workspace,
+    stats: stats
+  });
+});
