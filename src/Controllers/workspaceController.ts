@@ -86,6 +86,10 @@ export const addMemberToWorkspace = asyncHandler(async (req: Request, res: Respo
   });
 
   await workspace.save();
+  const populatedWorkspace = await Workspace.findById(workspaceId).populate({
+  path: "members.user",
+  select: "name email avatar",
+});
   emitToWorkspace(io, workspaceId, "member_added", {
     workspaceId: workspaceId,
     message: `${userToAdd.name} has been added to the workspace `,
@@ -99,7 +103,7 @@ export const addMemberToWorkspace = asyncHandler(async (req: Request, res: Respo
   res.status(200).json({
     success: true,
     message: "Member added successfully to the workspace",
-    data: workspace,
+    data: populatedWorkspace,
   });
 });
 
@@ -135,26 +139,47 @@ export const getWorkspaceById = asyncHandler(async (req: Request, res: Response,
     select: "name email avatar", 
   });
 
-  if (!workspace) {
-    return next(new AppError("Workspace not found", 404));
-  }
-
+  if (!workspace) return next(new AppError("Workspace not found", 404));
   const isMember = workspace.members.some(
-    (m) => m.user._id.toString() === (req as any).user._id.toString()
+    (m: any) => m.user._id.toString() === (req as any).user._id.toString()
   );
 
-  if (!isMember) {
-    return next(new AppError("You do not have access to this workspace", 403));
-  }
-
-  const stats = {
-    activeTasks: 12, 
-    totalMembers: workspace.members.length,
-  };
+  if (!isMember) return next(new AppError("Access denied", 403));
 
   res.status(200).json({
     success: true,
-    data: workspace,
-    stats: stats
+    data: workspace, 
+    stats: { activeTasks: 12, totalMembers: workspace.members.length }
+  });
+});
+
+export const removeMemberFromWorkspace = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  const { workspaceId, userIdToRemove } = req.body;
+  const adminId = (req as any).user._id;
+
+  const workspace = await Workspace.findById(workspaceId);
+  if (!workspace) return next(new AppError("Workspace not found", 404));
+
+  const requester = workspace.members.find(m => m.user.toString() === adminId.toString());
+  if (!requester || requester.role !== "admin") {
+    return next(new AppError("Only admins can remove members", 403));
+  }
+
+  if (adminId.toString() === userIdToRemove.toString()) {
+    return next(new AppError("You cannot remove yourself. Please delete workspace instead.", 400));
+  }
+
+  workspace.members = workspace.members.filter(
+    (m) => m.user.toString() !== userIdToRemove.toString()
+  ) as any;
+
+  await workspace.save();
+
+  const updatedWorkspace = await Workspace.findById(workspaceId).populate("members.user", "name email avatar");
+
+  res.status(200).json({
+    success: true,
+    message: "Member removed successfully",
+    data: updatedWorkspace
   });
 });
