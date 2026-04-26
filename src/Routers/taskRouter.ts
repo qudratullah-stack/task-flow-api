@@ -3,8 +3,8 @@ import { createTask ,getAllTasks,updateTask,deleteTask} from "../Controllers/tas
 import { protect } from "../MiddleWare/protectMiddleware";
 import { validate } from "../MiddleWare/validateMiddleware";
 import { createTaskSchema } from "../Controllers/Validations/task.validation";
-import { createWorkspace,addMemberToWorkspace,getAllMyWorkspaces, getWorkspaceById,removeMemberFromWorkspace } from "../Controllers/workspaceController";
-
+import { createWorkspace,getAllMyWorkspaces, getWorkspaceById } from "../Controllers/workspaceControllers/workspaceController";
+import { removeMemberFromWorkspace , addMemberToWorkspace, updateMemberRole, leaveWorkspace, getMemberProfile} from "../Controllers/workspaceControllers/workspaceMemberControllers";
 const TaskRouter = Router();
 
 /**
@@ -31,5 +31,7 @@ TaskRouter.delete("/remove-member", protect, removeMemberFromWorkspace)
 TaskRouter.post("/add-member", protect, addMemberToWorkspace);
 TaskRouter.get("/workspaces", protect, getAllMyWorkspaces);
 TaskRouter.get("/workspaces/:id", protect, getWorkspaceById);
-
+TaskRouter.patch("/update-role", protect, updateMemberRole); 
+TaskRouter.delete("/leave-workspace", protect, leaveWorkspace);
+TaskRouter.get("/member-profile/:userId", protect, getMemberProfile);
 export default TaskRouter;
