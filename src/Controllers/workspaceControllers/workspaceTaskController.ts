@@ -40,11 +40,12 @@ export const createGroupTask = asyncHandler(async (req: Request, res: Response) 
     .populate("createdBy", "name email avatar")
     .lean(); 
 
-  res.status(201).json({
-    success: true,
-    message: "Task synchronized successfully",
-    data: result,
-  });
+ 
+res.status(201).json({
+  success: true,
+  message: "Task created successfully",
+  data: result, 
+});
 });
 
 /**
@@ -96,5 +97,95 @@ export const getGroupAllTasks = asyncHandler(async (req: Request, res: Response)
       hasNextPage: skip + Number(limit) < totalTasks,
     },
     data: tasks,
+  });
+});
+
+
+export const deleteGroupTask = asyncHandler(async (req: Request, res: Response) => {
+  const { taskId } = req.params;
+  const userId = (req.user as any)._id; 
+
+ 
+  const task = await Task.findById(taskId).populate("workspace");
+
+  if (!task) {
+    return res.status(404).json({ success: false, message: "Task not found" });
+  }
+
+ 
+  const workspace = task.workspace as any;
+  const isOwner = workspace.owner.toString() === userId.toString();
+  const isCreator = task.createdBy.toString() === userId.toString();
+
+ 
+  if (!isOwner && !isCreator) {
+    return res.status(403).json({ 
+      success: false, 
+      message: "Security Alert: You are not authorized to delete this task" 
+    });
+  }
+
+  await task.deleteOne();
+
+  res.status(200).json({
+    success: true,
+    message: "Task deleted successfully by authorized user",
+  });
+});
+
+
+
+export const updateGroupTask = asyncHandler(async (req: Request, res: Response) => {
+  const { taskId } = req.params;
+  const updates = req.body; 
+  const userId = (req.user as any)._id;
+
+  const task = await Task.findById(taskId).populate("workspace");
+  if (!task) {
+    return res.status(404).json({ success: false, message: "Task not found" });
+  }
+
+  const workspace = task.workspace as any;
+  const isOwner = workspace.owner.toString() === userId.toString();
+  const isCreator = task.createdBy.toString() === userId.toString();
+  const isAssignee = task.assignee.toString() === userId.toString(); 
+
+  
+  
+  
+  if (isOwner) {
+   
+  } 
+ 
+  else if (isCreator || isAssignee) {
+    const allowedFields = ["status"];
+    const attemptToChangeFields = Object.keys(updates);
+    const isViolating = attemptToChangeFields.some(field => !allowedFields.includes(field));
+
+    if (isViolating) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: Only Admin can edit task details. You can only update status."
+      });
+    }
+  } 
+ 
+  else {
+    return res.status(403).json({ 
+      success: false, 
+      message: "Security Alert: Not authorized to update this task" 
+    });
+  }
+
+  const updatedTask = await Task.findByIdAndUpdate(
+    taskId,
+    { $set: updates },
+    { new: true, runValidators: true }
+  ).populate("assignee", "name avatar");
+
+  res.status(200).json({
+    success: true,
+    message: "Task updated successfully",
+    data: updatedTask,
   });
 });
