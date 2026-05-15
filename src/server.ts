@@ -14,6 +14,7 @@ import TaskRouter from "./Routers/taskRouter";
 import passport from 'passport';
 import { setupSocketHandlers } from "./services/socketService";
 import WorkspaceRouter from "./Routers/workspaceRouter";
+import NotificationRouter from "./Routers/notificationRouter";
 const app: Application = express();
 const PORT = process.env.PORT || 5000;
 
@@ -46,6 +47,7 @@ app.use("/api/v1/auth", signupRoute);
 app.use('/api/v1/auth', googleRouter);
 app.use("/api/v1/tasks", TaskRouter);
 app.use("/api/v1/workspace", WorkspaceRouter);
+app.use("/api/v1/NotificationRouter", NotificationRouter);
 app.use('/uploads', express.static('public/uploads'));
 
 // Error Handlers
