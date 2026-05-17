@@ -21,8 +21,8 @@ export interface INotification extends Document {
 
 const notificationSchema = new Schema<INotification>(
   {
-    recipient: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
-    sender: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    recipient: { type: Schema.Types.ObjectId, ref: "SaasUser", required: true, index: true },
+    sender: { type: Schema.Types.ObjectId, ref: "SaasUser", required: true },
     type: { 
       type: String, 
       enum: Object.values(NotificationType), 
@@ -37,5 +37,5 @@ const notificationSchema = new Schema<INotification>(
 );
 
 notificationSchema.index({ recipient: 1, isRead: 1 });
-
+import "../Models/signupSchema"
 export const Notification = mongoose.model<INotification>("Notification", notificationSchema);

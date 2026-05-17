@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../../MiddleWare/asyncHandler";
+import { signup } from "../../Models/signupSchema"; 
 import { Notification } from "../../Models/notificationModel";
 
 /**
@@ -7,24 +8,40 @@ import { Notification } from "../../Models/notificationModel";
  * @route   GET /api/v1/notifications
  */
 export const getMyNotifications = asyncHandler(async (req: Request, res: Response) => {
-  const userId = (req.user as any)._id;
+    const userId = (req.user as any)._id;
+  
+    try {
+      const notifications = await Notification.find({ recipient: userId })
+        .sort({ createdAt: -1 })
+        .limit(50)
+        .populate({
+          path: "sender",
+          model: "SaasUser",
+          select: "name email avatar" 
+        })
+        .lean();
 
-  const notifications = await Notification.find({ recipient: userId })
-    .sort({ createdAt: -1 })
-    .limit(50) 
-    .populate("sender", "name avatar");
-
-  const unreadCount = await Notification.countDocuments({ 
-    recipient: userId, 
-    isRead: false 
+      const validNotifications = notifications.filter(notif => notif.sender !== null);
+  
+      const unreadCount = await Notification.countDocuments({ 
+        recipient: userId, 
+        isRead: false 
+      });
+  
+      res.status(200).json({
+        success: true,
+        unreadCount,
+        data: validNotifications
+      });
+    } catch (error: any) {
+      console.error(" Notification Controller Error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Server Error while fetching notifications",
+        error: error.message
+      });
+    }
   });
-
-  res.status(200).json({
-    success: true,
-    unreadCount,
-    data: notifications
-  });
-});
 
 /**
  * @desc    Mark notification as read
